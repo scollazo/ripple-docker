@@ -1,0 +1,82 @@
+From 7db18a129f142609ed2aca809f71a43ab20d371b Mon Sep 17 00:00:00 2001
+From: Santiago Rodriguez <scollazo@gmail.com>
+Date: Sat, 22 Nov 2014 02:40:05 +0000
+Subject: [PATCH] create default user
+
+---
+ Makefile          |  1 +
+ bin/ripple-cli.js |  1 +
+ bin/util-cli.js   | 35 ++++++++++++++++++++++++++++++++++-
+ 3 files changed, 36 insertions(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index cdfcefc..f0de0a9 100755
+--- a/Makefile
++++ b/Makefile
+@@ -29,6 +29,7 @@ generate-cert:
+ 
+ db-migrate:
+ 	@node script/migrate.js
++	@node bin/ripple-cli.js account set
+ 
+ account-reset:
+ 	@ripple account reset
+diff --git a/bin/ripple-cli.js b/bin/ripple-cli.js
+index 9bef2ef..ad9f407 100644
+--- a/bin/ripple-cli.js
++++ b/bin/ripple-cli.js
+@@ -88,6 +88,7 @@ program
+      * @command Ripple account reset
+      */
+     if( action[0] === 'reset' ) utilCli.createAdmin();
++    if( action[0] === 'set' ) utilCli.setAdmin();
+     else HELP.notify( actHelp );
+ 
+   })
+diff --git a/bin/util-cli.js b/bin/util-cli.js
+index b2fe808..4cd9067 100644
+--- a/bin/util-cli.js
++++ b/bin/util-cli.js
+@@ -181,4 +181,37 @@ UTIL.updateDB = function(){
+   shell.exec('cd ' + installDir +' && make db-migrate');
+   UTIL.abort( shell.error() );
+   UTIL.notify("Database Ready...");
+-};
+\ No newline at end of file
++};
++
++
++// set admin
++
++UTIL.setAdmin = function(){
++  var dbLocalPath = path.join(path.resolve( '.' ),'lib','db-manager.js')
++    , DB = require( dbLocalPath );
++  console.log("DB Lib Path", dbLocalPath);
++
++  DB.connect(function() {
++
++      UTIL.user = "Administrator";
++      UTIL.password = "ripple"
++      saltAndHash(UTIL.password, function(hashedPwd){
++      // Create account in db
++        adminObj = {
++          name: "Administrator",
++          pass: hashedPwd,
++          roles: ['admin']
++        };
++        DB.init.collection("accounts").update({user:UTIL.user},{$set:adminObj},{upsert:true}, function(err){
++          if(err) UITL.abort('Could not create Admin Account');
++          console.log("Admin account created");
++          UTIL.user = null;
++          UTIL.password = null;
++          DB.init.close();          
++        })
++
++      });
++    
++  });
++};
++
+-- 
+1.9.1
+
