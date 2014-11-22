@@ -1,6 +1,6 @@
 FROM ubuntu:14.04
 
-MAINTAINER Santiago Rodríguez
+MAINTAINER Santiago Rodríguez <scollazo@gmail.com>
 
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y curl git-core libssl-dev g++ mongodb-server mongodb supervisor make
@@ -19,6 +19,9 @@ RUN (cd /opt && git clone https://github.com/uoregon-libraries/ripple ripple)
 ADD create_default_admin.patch /opt/ripple/create_default_admin.patch
 RUN (cd /opt/ripple && patch -p1 < create_default_admin.patch )
 RUN (cd /opt/ripple && npm install)
+RUN (cd /opt/ripple/plugins && git clone https://github.com/uoregon-libraries/ripple-heatmap.git heatmap)
+
+
 ADD config.js /opt/ripple/
 RUN (SECRET=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;) && sed -i "s/CHANGEME/$SECRET/g" /opt/ripple/config.js)
 
