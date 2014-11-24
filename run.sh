@@ -20,6 +20,7 @@ if ! [ -f /var/lib/mongodb/ripple.0 ]
 	mongod -f /etc/mongodb.conf --shutdown && rm -f /opt/firstrun.sh
 	fi
 
+chown mongodb.mongodb /var/lib/mongodb -R 
 supervisord
 
 
