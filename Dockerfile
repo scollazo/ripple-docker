@@ -2,8 +2,7 @@ FROM ubuntu:14.04
 
 MAINTAINER Santiago Rodríguez <scollazo@gmail.com>
 
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y curl git-core libssl-dev g++ mongodb-server mongodb supervisor make
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl git-core libssl-dev g++ mongodb-server mongodb supervisor make
 
 #Install nvm and node v0.8.25
 RUN (cd /opt && git clone https://github.com/creationix/nvm.git nvm)
@@ -28,8 +27,6 @@ RUN (SECRET=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;) && sed
 
 
 RUN (touch /var/log/ripple.log && chown ripple.ripple /var/log/ripple.log && chown ripple.ripple /opt/ripple/* -R)
-
-RUN (apt-get clean)
 
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
